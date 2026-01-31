@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback System</title>
+    <style>
+        :root { --discord-blue: #5865F2; --bg: #090909; --card: #151515; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: white; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .box { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { margin-top: 0; color: var(--discord-blue); font-size: 1.5rem; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; color: #aaa; }
+        textarea { width: 100%; height: 100px; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #333; background: #202020; color: white; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 15px; background: var(--discord-blue); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: transform 0.1s; }
+        button:active { transform: scale(0.98); }
+        #msg { text-align: center; margin-top: 15px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Submit Report</h2>
+        
+        <label>What's making things bad?</label>
+        <textarea id="issue" placeholder="Explain the problem..."></textarea>
+        
+        <label>How can we fix it?</label>
+        <textarea id="suggestion" placeholder="Your suggestions..."></textarea>
+        
+        <button onclick="sendData()">Post to Discord</button>
+        <p id="msg"></p>
+    </div>
+
+    <script>
+        async function sendData() {
+            const hook = "https://discord.com/api/webhooks/1467137149873819710/oDpNM0_05l4BLYpA6yri4jQ_mB14fvJF5wkOOsMozD4KNM17kBXFmb189GWvxr2-r_kb";
+            const issueText = document.getElementById('issue').value;
+            const suggestText = document.getElementById('suggestion').value;
+            const status = document.getElementById('msg');
+
+            if (!issueText || !suggestText) {
+                status.innerText = "⚠️ Fill out both boxes first!";
+                status.style.color = "#ffcc00";
+                return;
+            }
+
+            status.innerText = "Sending...";
+            
+            const data = {
+                embeds: [{
+                    title: "📢 Website Feedback Received",
+                    color: 5763719,
+                    fields: [
+                        { name: "The Issue", value: issueText },
+                        { name: "The Suggestion", value: suggestText }
+                    ],
+                    timestamp: new Date()
+                }]
+            };
+
+            try {
+                const response = await fetch(hook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    status.innerText = "✅ Successfully posted to Discord!";
+                    status.style.color = "#43b581";
+                    document.getElementById('issue').value = "";
+                    document.getElementById('suggestion').value = "";
+                } else {
+                    status.innerText = "❌ Error: Failed to send.";
+                }
+            } catch (err) {
+                status.innerText = "🛑 Connection Error.";
+            }
+        }
+    </script>
+</body>
+</html>
