@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blobtown Protection Portal</title>
+    <style>
+        :root { --bt-yellow: #FFD700; --bt-dark: #121212; }
+        body { 
+            margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url('https://api.screenshotmachine.com/api/v1/storage/679d1917f694e8001ba90076');
+            background-size: cover; background-position: center; background-attachment: fixed; color: white;
+        }
+        .container { 
+            background: rgba(18, 18, 18, 0.9); width: 90%; max-width: 400px; padding: 30px; 
+            border-radius: 25px; border: 4px solid var(--bt-yellow); text-align: center; backdrop-filter: blur(10px);
+        }
+        h1 { color: var(--bt-yellow); text-shadow: 2px 2px #000; }
+        label { display: block; text-align: left; margin-bottom: 5px; color: var(--bt-yellow); font-weight: bold; }
+        input, textarea { 
+            width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 12px; border: 2px solid #333; 
+            background: #000; color: white; box-sizing: border-box; font-size: 16px;
+        }
+        button { 
+            width: 100%; padding: 15px; background: var(--bt-yellow); color: black; border: none; 
+            border-radius: 50px; font-weight: 900; cursor: pointer;
+        }
+        #status { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>REPORT HUB</h1>
+        <label>USERNAME</label>
+        <input type="text" id="username" placeholder="Name...">
+        <label>ISSUE</label>
+        <textarea id="issue" rows="3" placeholder="Details..."></textarea>
+        <label>SUGGESTION</label>
+        <textarea id="suggestion" rows="3" placeholder="Fix..."></textarea>
+        <button onclick="submitToDiscord()">SEND REPORT</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        // ADD BAD WORDS TO THIS LIST
+        const BANNED_WORDS = ["badword1", "badword2", "spam"]; 
+
+        async function submitToDiscord() {
+            const webhook = "https://discord.com/api/webhooks/1467137149873819710/oDpNM0_05l4BLYpA6yri4jQ_mB14fvJF5wkOOsMozD4KNM17kBXFmb189GWvxr2-r_kb";
+            const user = document.getElementById('username').value;
+            const issue = document.getElementById('issue').value;
+            const sugg = document.getElementById('suggestion').value;
+            const stat = document.getElementById('status');
+
+            if (!user || !issue || !sugg) {
+                stat.innerText = "❌ Fill all fields!";
+                return;
+            }
+
+            // Check for bad words
+            const allText = (user + issue + sugg).toLowerCase();
+            const hasBadWord = BANNED_WORDS.some(word => allText.includes(word));
+
+            stat.innerText = "⏳ PROCESSING...";
+
+            let userIP = "Unknown";
+            try {
+                // Fetch user IP
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                userIP = ipData.ip;
+            } catch (e) { console.error("IP fetch failed"); }
+
+            const payload = {
+                username: hasBadWord ? "⚠️ SYSTEM SECURITY" : "Blobtown Bot",
+                embeds: [{
+                    title: hasBadWord ? "🚨 PROFANITY DETECTED" : "New Blobtown Report",
+                    color: hasBadWord ? 15548997 : 16765184,
+                    fields: [
+                        { name: "User", value: user },
+                        { name: "Issue", value: issue },
+                        { name: "Suggestion", value: sugg },
+                        { name: "User IP Address", value: `||${userIP}||` } // Spoilered for privacy
+                    ],
+                    footer: { text: hasBadWord ? "USER HAS BEEN LOGGED" : "Safe Submission" },
+                    timestamp: new Date()
+                }]
+            };
+
+            try {
+                const response = await fetch(webhook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    stat.innerText = hasBadWord ? "⚠️ Warning: Profanity Logged." : "✅ SENT!";
+                    stat.style.color = hasBadWord ? "#ff9900" : "#44ff44";
+                    if (!hasBadWord) document.querySelectorAll('input, textarea').forEach(el => el.value = "");
+                }
+            } catch (err) {
+                stat.innerText = "❌ CONNECTION FAILED";
+            }
+        }
+    </script>
+</body>
+</html>
