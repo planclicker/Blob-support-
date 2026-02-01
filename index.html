@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLOBTOWN_TERMINAL_V1.c</title>
+    <style>
+        :root { --cmd-green: #00ff41; --cmd-bg: rgba(0, 0, 0, 0.85); }
+        
+        body { 
+            margin: 0;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://api.screenshotmachine.com/api/v1/storage/679d1917f694e8001ba90076');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh;
+            color: var(--cmd-green);
+        }
+
+        .terminal-box { 
+            background: var(--cmd-bg); 
+            padding: 30px; 
+            border-radius: 5px; 
+            width: 90%; 
+            max-width: 450px; 
+            border: 1px solid var(--cmd-green); 
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+
+        h2 { border-bottom: 1px solid var(--cmd-green); padding-bottom: 10px; font-size: 1.2rem; }
+        
+        .input-line { margin-bottom: 20px; }
+        .prompt { color: var(--cmd-green); margin-right: 5px; }
+        
+        input, textarea { 
+            width: 100%; 
+            background: transparent;
+            border: none;
+            border-left: 1px solid var(--cmd-green);
+            padding: 8px 12px;
+            color: var(--cmd-green);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        textarea { height: 80px; resize: none; border-bottom: 1px solid rgba(0, 255, 65, 0.2); }
+
+        button { 
+            width: 100%; 
+            background: var(--cmd-green); 
+            color: black; 
+            border: none; 
+            padding: 12px; 
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        button:active { background: #00cc33; }
+        #status { margin-top: 15px; font-size: 0.8rem; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="terminal-box">
+        <h2>#include &lt;blobtown_feedback.h&gt;</h2>
+        
+        <div class="input-line">
+            <span class="prompt">USER_ID:</span>
+            <input type="text" id="u" placeholder="...">
+        </div>
+
+        <div class="input-line">
+            <span class="prompt">ISSUE_LOG:</span>
+            <textarea id="i" placeholder="describe..."></textarea>
+        </div>
+        
+        <div class="input-line">
+            <span class="prompt">PATCH_SUGGESTION:</span>
+            <textarea id="s" placeholder="fix..."></textarea>
+        </div>
+        
+        <button onclick="transmit()">./run_transmit</button>
+        <p id="status">> IDLE</p>
+    </div>
+
+    <script>
+        async function transmit() {
+            const hook = "https://discord.com/api/webhooks/1467137149873819710/oDpNM0_05l4BLYpA6yri4jQ_mB14fvJF5wkOOsMozD4KNM17kBXFmb189GWvxr2-r_kb";
+            const user = document.getElementById('u').value;
+            const issue = document.getElementById('i').value;
+            const sugg = document.getElementById('s').value;
+            const stat = document.getElementById('status');
+
+            if (!user || !issue || !sugg) {
+                stat.innerText = "> ERROR: NULL_POINTER_EXCEPTION (Empty Fields)";
+                return;
+            }
+
+            stat.innerText = "> EXEC: TRANSMITTING_PACKETS...";
+            
+            try {
+                const response = await fetch(hook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        embeds: [{
+                            title: "SYSTEM LOG: FEEDBACK_RECEIVED",
+                            color: 65280, // Terminal Green
+                            fields: [
+                                { name: "ID", value: user },
+                                { name: "LOG", value: issue },
+                                { name: "FIX", value: sugg }
+                            ],
+                            timestamp: new Date()
+                        }]
+                    })
+                });
+
+                if (response.ok) {
+                    stat.innerText = "> SUCCESS: DATA_SENT_TO_HOST";
+                    document.querySelectorAll('input, textarea').forEach(el => el.value = "");
+                } else {
+                    stat.innerText = "> ERROR: DISCORD_CODE_" + response.status;
+                }
+            } catch (err) {
+                stat.innerText = "> CRITICAL: CONNECTION_REFUSED";
+            }
+        }
+    </script>
+</body>
+</html>
