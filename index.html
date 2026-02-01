@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blobtown Feedback Portal</title>
+    <style>
+        :root {
+            --bt-yellow: #FFD700;
+            --bt-dark: #121212;
+            --bt-glass: rgba(18, 18, 18, 0.85);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Using the Blobtown image you provided */
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                        url('https://api.screenshotmachine.com/api/v1/storage/679d1917f694e8001ba90076');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+        }
+
+        .container {
+            background: var(--bt-glass);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 25px;
+            border: 4px solid var(--bt-yellow);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--bt-yellow);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px #000;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--bt-yellow);
+            font-size: 0.9rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border: 2px solid #333;
+            background: #000;
+            color: white;
+            box-sizing: border-box;
+            font-size: 16px; /* Best for iPhone to prevent zooming */
+            outline: none;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--bt-yellow);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--bt-yellow);
+            color: black;
+            border: none;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            background: #e6c200;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>REPORT HUB</h1>
+        
+        <label>USERNAME (DISCORD/BT)</label>
+        <input type="text" id="username" placeholder="Type name here...">
+
+        <label>WHAT IS WRONG?</label>
+        <textarea id="issue" rows="3" placeholder="Describe the issue..."></textarea>
+
+        <label>SUGGESTIONS</label>
+        <textarea id="suggestion" rows="3" placeholder="How can we fix it?"></textarea>
+
+        <button onclick="submitToDiscord()">SEND REPORT</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        async function submitToDiscord() {
+            const webhook = "https://discord.com/api/webhooks/1467137149873819710/oDpNM0_05l4BLYpA6yri4jQ_mB14fvJF5wkOOsMozD4KNM17kBXFmb189GWvxr2-r_kb";
+            
+            const user = document.getElementById('username').value;
+            const issue = document.getElementById('issue').value;
+            const sugg = document.getElementById('suggestion').value;
+            const stat = document.getElementById('status');
+
+            if (!user || !issue || !sugg) {
+                stat.innerText = "❌ Please fill everything out!";
+                stat.style.color = "#ff4444";
+                return;
+            }
+
+            stat.innerText = "⏳ SENDING...";
+            stat.style.color = "white";
+
+            const payload = {
+                username: "Blobtown Feedback Bot",
+                embeds: [{
+                    title: "New Blobtown Report",
+                    color: 16765184, // Yellow
+                    fields: [
+                        { name: "User", value: user },
+                        { name: "The Issue", value: issue },
+                        { name: "Suggestion", value: sugg }
+                    ],
+                    timestamp: new Date()
+                }]
+            };
+
+            try {
+                const response = await fetch(webhook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    stat.innerText = "✅ SENT TO DISCORD!";
+                    stat.style.color = "#44ff44";
+                    // Clear inputs
+                    document.getElementById('username').value = "";
+                    document.getElementById('issue').value = "";
+                    document.getElementById('suggestion').value = "";
+                } else {
+                    stat.innerText = "❌ ERROR: " + response.status;
+                    stat.style.color = "#ff4444";
+                }
+            } catch (err) {
+                stat.innerText = "❌ CONNECTION FAILED";
+                stat.style.color = "#ff4444";
+            }
+        }
+    </script>
+</body>
+</html>
