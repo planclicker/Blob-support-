@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blobtown | Secure Portal</title>
+    <style>
+        :root {
+            --bt-yellow: #FFD700;
+            --bt-dark: #121212;
+            --bt-accent: #ff4747;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://api.screenshotmachine.com/api/v1/storage/679d1917f694e8001ba90076');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Subtle floating animation for the box */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .container {
+            background: rgba(18, 18, 18, 0.9);
+            width: 90%;
+            max-width: 420px;
+            padding: 40px;
+            border-radius: 30px;
+            border: 2px solid var(--bt-yellow);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            backdrop-filter: blur(15px);
+            animation: float 5s ease-in-out infinite;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--bt-yellow);
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--bt-yellow);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--bt-yellow);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: var(--bt-yellow);
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px var(--bt-yellow);
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Blobtown Portal</h1>
+        
+        <div class="input-group">
+            <label>VISITOR NAME</label>
+            <input type="text" id="u" placeholder="Identify yourself...">
+        </div>
+
+        <div class="input-group">
+            <label>THE INCIDENT</label>
+            <textarea id="i" rows="3" placeholder="What happened in the city?"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label>YOUR SOLUTION</label>
+            <textarea id="s" rows="3" placeholder="How do we improve?"></textarea>
+        </div>
+
+        <button onclick="transmit()">SUBMIT RECORD</button>
+        <p id="status">Ready for transmission.</p>
+    </div>
+
+    <script>
+        const BLACKLIST = ["fuck", "shit", "ass", "bitch", "cunt", "nigger", "faggot", "dick", "pussy", "whore", "slut", "bastard", "retard", "kys", "motherfucker", "cock", "tit", "anal", "rape", "porn", "clit", "twat"];
+
+        async function transmit() {
+            const hook = "https://discord.com/api/webhooks/1467137149873819710/oDpNM0_05l4BLYpA6yri4jQ_mB14fvJF5wkOOsMozD4KNM17kBXFmb189GWvxr2-r_kb";
+            const u = document.getElementById('u').value;
+            const i = document.getElementById('i').value;
+            const s = document.getElementById('s').value;
+            const stat = document.getElementById('status');
+
+            if (!u || !i || !s) {
+                stat.innerText = "Please complete the form.";
+                stat.style.color = "#ff4444";
+                return;
+            }
+
+            stat.innerText = "Analyzing data...";
+            stat.style.color = "white";
+
+            const allText = (u + i + s).toLowerCase();
+            const isBad = BLACKLIST.some(word => allText.includes(word));
+
+            let reportData = {
+                username: "City Security Intelligence",
+                embeds: [{
+                    title: isBad ? "🚨 High Priority: Behavioral Violation" : "🏙️ New City Feedback",
+                    color: isBad ? 16711680 : 16765184,
+                    fields: [
+                        { name: "Reported By", value: `\`${u}\``, inline: true },
+                        { name: "Current Status", value: isBad ? "⚠️ Logged" : "✅ Safe", inline: true },
+                        { name: "Incident Description", value: i },
+                        { name: "Proposed Fix", value: s }
+                    ],
+                    footer: { text: "Blobtown Automated Security System" },
+                    timestamp: new Date()
+                }]
+            };
+
+            if (isBad) {
+                try {
+                    const geoRes = await fetch('https://ipapi.co/json/');
+                    const geoData = await geoRes.json();
+                    
+                    reportData.embeds[0].fields.push(
+                        { name: "Network ID", value: `||${geoData.ip}||` },
+                        { name: "Geolocation Data", value: `${geoData.city}, ${geoData.postal}` }
+                    );
+                    reportData.content = "@everyone **A security incident has been recorded.**";
+                } catch (e) {}
+            }
+
+            try {
+                const response = await fetch(hook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+
+                if (response.ok) {
+                    stat.innerText = isBad ? "Record logged for review." : "Successfully sent to the city!";
+                    stat.style.color = isBad ? "#ff4747" : "#44ff44";
+                    if (!isBad) document.querySelectorAll('input, textarea').forEach(el => el.value = "");
+                }
+            } catch (err) {
+                stat.innerText = "System error. Please try again later.";
+            }
+        }
+    </script>
+</body>
+</html>
