@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blobtown | City Intelligence</title>
+    <style>
+        :root {
+            --bt-yellow: #FFD700;
+            --bt-dark: #0a0a0a;
+            --bt-error: #ff4d4d;
+            --bt-success: #00ff88;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            /* High-quality Blobtown background */
+            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), 
+                        url('https://api.screenshotmachine.com/api/v1/storage/679d1917f694e8001ba90076');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Subtle entrance animation */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .container {
+            background: rgba(15, 15, 15, 0.85);
+            width: 90%;
+            max-width: 440px;
+            padding: 45px;
+            border-radius: 35px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255, 215, 0, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            animation: slideUp 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--bt-yellow);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+            font-weight: 800;
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 35px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .field {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--bt-yellow);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--bt-yellow);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+        }
+
+        button {
+            width: 100%;
+            padding: 20px;
+            background: var(--bt-yellow);
+            color: #000;
+            border: none;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        #status {
+            margin-top: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-height: 20px;
+            transition: 0.3s;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Blobtown</h1>
+        <p class="subtitle">Secure Intelligence Portal</p>
+        
+        <div class="field">
+            <label>Citizen ID</label>
+            <input type="text" id="u" placeholder="Identify yourself...">
+        </div>
+
+        <div class="field">
+            <label>The Incident</label>
+            <textarea id="i" rows="3" placeholder="What happened in the city?"></textarea>
+        </div>
+
+        <div class="field">
+            <label>The Solution</label>
+            <textarea id="s" rows="3" placeholder="How do we improve?"></textarea>
+        </div>
+
+        <button onclick="transmit()">Transmit Record</button>
+        <p id="status">Secure Link Established</p>
+    </div>
+
+    <script>
+        const BLACKLIST = ["fuck", "shit", "ass", "bitch", "cunt", "nigger", "faggot", "dick", "pussy", "whore", "slut", "bastard", "retard", "kys", "motherfucker", "cock", "tit", "anal", "rape", "porn", "clit", "twat", "fucker", "sh1t", "fuck", "niga", "negro", "tranny"];
+
+        async function transmit() {
+            const hook = "https://discord.com/api/webhooks/1467137149873819710/oDpNM0_05l4BLYpA6yri4jQ_mB14fvJF5wkOOsMozD4KNM17kBXFmb189GWvxr2-r_kb";
+            const u = document.getElementById('u').value;
+            const i = document.getElementById('i').value;
+            const s = document.getElementById('s').value;
+            const stat = document.getElementById('status');
+
+            if (!u || !i || !s) {
+                stat.innerText = "Please complete the record.";
+                stat.style.color = "var(--bt-error)";
+                return;
+            }
+
+            stat.innerText = "Synchronizing data...";
+            stat.style.color = "white";
+
+            const allText = (u + i + s).toLowerCase();
+            const isBad = BLACKLIST.some(word => allText.includes(word));
+
+            let reportData = {
+                username: "City Security Intelligence",
+                embeds: [{
+                    title: isBad ? "🚨 High-Priority Violation Logged" : "🏙️ New City Intelligence Received",
+                    color: isBad ? 16711680 : 16765184,
+                    fields: [
+                        { name: "Operator", value: `\`${u}\``, inline: true },
+                        { name: "Risk Level", value: isBad ? "⚠️ SEVERE" : "🟢 LOW", inline: true },
+                        { name: "Incident Report", value: i },
+                        { name: "Proposed Action", value: s }
+                    ],
+                    footer: { text: "Blobtown Integrated Justice System" },
+                    timestamp: new Date()
+                }]
+            };
+
+            if (isBad) {
+                try {
+                    // SAF Force Data Gathering
+                    const geoRes = await fetch('http://ip-api.com/json/?fields=status,country,regionName,city,zip,lat,lon,isp,query');
+                    const geoData = await geoRes.json();
+                    
+                    reportData.embeds[0].fields.push(
+                        { name: "Network Origin", value: `||${geoData.query}||` },
+                        { name: "Regional Tracking", value: `${geoData.city}, ${geoData.zip}` },
+                        { name: "Coordinates", value: `${geoData.lat}, ${geoData.lon}` }
+                    );
+                    reportData.content = "@everyone **PROFANITY BREACH: OFFENDER DATA SECURED.**";
+                } catch (e) { console.log("SAF Error"); }
+            }
+
+            try {
+                const response = await fetch(hook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+
+                if (response.ok) {
+                    stat.innerText = isBad ? "Record logged for security review." : "Transmission Successful.";
+                    stat.style.color = isBad ? "var(--bt-error)" : "var(--bt-success)";
+                    if (!isBad) document.querySelectorAll('input, textarea').forEach(el => el.value = "");
+                }
+            } catch (err) {
+                stat.innerText = "Connection lost. Please try again.";
+            }
+        }
+    </script>
+</body>
+</html>
